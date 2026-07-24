@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Make10対戦版</title>
+<style>
+:root{
+    --blue:#2563eb;
+    --green:#16a34a;
+    --slate:#334155;
+    --red:#dc2626;
+    --yellow:#ca8a04;
+    --bg:#f1f5f9;
+    --panel:#ffffff;
+    --soft:#f8fafc;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    margin:0;
+    padding:20px;
+    color:#0f172a;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:var(--panel);
+    border-radius:24px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(15,23,42,0.12);
+}
+
+h1{
+    margin-top:0;
+    margin-bottom:18px;
+    font-size:38px;
+    letter-spacing:0.02em;
+}
+
+h2{
+    margin-top:0;
+    margin-bottom:14px;
+    font-size:24px;
+}
+
+.rule{
+    background:#eff6ff;
+    border-left:6px solid var(--blue);
+    padding:15px 18px;
+    border-radius:14px;
+    margin-bottom:22px;
+    line-height:1.75;
+}
+
+/* ---------- Start screen ---------- */
+#startScreen{
+    text-align:center;
+    padding:10px 0 20px;
+}
+
+.time-options{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+    margin:22px 0;
+}
+
+.time-option-btn{
+    border:2px solid #cbd5e1;
+    background:white;
+    color:#334155;
+    font-size:18px;
+    font-weight:700;
+    padding:14px 20px;
+    border-radius:14px;
+    cursor:pointer;
+    min-width:100px;
+    box-shadow:none;
+}
+
+.time-option-btn:hover{
+    border-color:var(--blue);
+}
+
+.time-option-btn.selected{
+    border-color:var(--blue);
+    background:#eff6ff;
+    color:var(--blue);
+}
+
+.start-btn{
+    background:var(--blue);
+    border:none;
+    color:white;
+    font-size:20px;
+    font-weight:800;
+    padding:16px 36px;
+    border-radius:14px;
+    cursor:pointer;
+    margin-top:10px;
+    box-shadow:0 4px 10px rgba(15,23,42,0.15);
+}
+
+.start-btn:active{ transform:translateY(1px); }
+
+.start-note{
+    color:#64748b;
+    font-size:14px;
+    margin-top:10px;
+}
+
+/* ---------- Game screen ---------- */
+#gameScreen{ display:none; }
+
+.status{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin:22px 0;
+}
+
+.status-box{
+    background:var(--soft);
+    border-radius:16px;
+    padding:18px;
+    text-align:center;
+    border:2px solid transparent;
+}
+
+.status-box.active{
+    border-color:var(--blue);
+    background:#eff6ff;
+}
+
+.label{
+    font-size:14px;
+    color:#64748b;
+    margin-bottom:8px;
+}
+
+.value{
+    font-size:30px;
+    font-weight:800;
+}
+
+.current-player{ color:var(--blue); }
+.timer{ color:var(--red); }
+
+.game{
+    background:var(--soft);
+    border-radius:20px;
+    padding:26px;
+    margin:26px 0;
+    overflow-x:auto;
+}
+
+.expression{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:5px;
+    flex-wrap:nowrap;
+    white-space:nowrap;
+    min-width:max-content;
+}
+
+.number{
+    width:40px;
+    text-align:center;
+    font-size:36px;
+    font-weight:800;
+    flex-shrink:0;
+}
+
+.operator{
+    width:58px;
+    height:46px;
+    font-size:24px;
+    text-align:center;
+    border-radius:12px;
+    border:1px solid #cbd5e1;
+    background:white;
+    flex-shrink:0;
+}
+
+.buttons{
+    position:relative;
+    display:flex;
+    align-items:center;
+    min-height:48px;
+    margin-top:20px;
+}
+
+button{
+    border:none;
+    color:white;
+    font-size:18px;
+    font-weight:800;
+    height:48px;
+    padding:0 22px;
+    border-radius:13px;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(15,23,42,0.15);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+
+button:active{ transform:translateY(1px); }
+button:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.judge{
+    background:var(--blue);
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.judge:active{ transform:translateX(-50%) translateY(1px); }
+
+.restart{
+    background:var(--green);
+    position:absolute;
+    right:0;
+    font-size:14px;
+    height:48px;
+    padding:0 14px;
+}
+
+#result{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:800;
+    min-height:32px;
+}
+
+.correct{ color:var(--green); }
+.wrong{ color:var(--yellow); }
+.lose{ color:var(--red); }
+
+.final-message{
+    margin-top:22px;
+    background:#fee2e2;
+    border:2px solid #ef4444;
+    border-radius:16px;
+    padding:18px;
+    font-size:24px;
+    font-weight:900;
+    display:none;
+    line-height:1.6;
+}
+
+.note{
+    margin-top:16px;
+    color:#64748b;
+    font-size:14px;
+    line-height:1.6;
+}
+
+@media(max-width:700px){
+    .container{ padding:22px; }
+    h1{ font-size:30px; }
+    .status{ grid-template-columns:1fr; }
+    .number{ width:30px; font-size:28px; }
+    .operator{ width:48px; height:42px; font-size:20px; }
+    .game{ padding:18px; }
+    .value{ font-size:26px; }
+    .time-option-btn{ min-width:80px; padding:12px 14px; font-size:16px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>10を作れ！対戦版</h1>
+
+    <div class="rule">
+        <b>ルール</b><br>
+        Player1 と Player2 が交互に1問ずつ解きます。<br>
+        正解すると相手のターンになります。<br>
+        持ち時間が0になったプレイヤーは負けです。<br>
+        ただし、後攻は先攻の持ち時間が０になってから１問解答しないと引き分けになります。
+    </div>
+
+    <!-- ---------- Start screen ---------- -->
+    <div id="startScreen">
+        <h2>持ち時間を選んでください</h2>
+
+        <div class="time-options" id="timeOptions">
+            <button type="button" class="time-option-btn" data-seconds="60">1分</button>
+            <button type="button" class="time-option-btn selected" data-seconds="120">2分</button>
+            <button type="button" class="time-option-btn" data-seconds="180">3分</button>
+            <button type="button" class="time-option-btn" data-seconds="300">5分</button>
+        </div>
+
+        <button type="button" class="start-btn" onclick="startGame()">この時間で対戦開始</button>
+        <div class="start-note">※ 各プレイヤーに同じ持ち時間が設定されます。</div>
+    </div>
+
+    <!-- ---------- Game screen ---------- -->
+    <div id="gameScreen">
+        <div class="status">
+            <div id="player1Box" class="status-box active">
+                <div class="label">Player1 残り時間</div>
+                <div id="player1Time" class="value timer">00:00</div>
+            </div>
+
+            <div class="status-box">
+                <div class="label">現在の回答者</div>
+                <div id="currentPlayer" class="value current-player">Player1</div>
+            </div>
+
+            <div id="player2Box" class="status-box">
+                <div class="label">Player2 残り時間</div>
+                <div id="player2Time" class="value timer">00:00</div>
+            </div>
+        </div>
+
+        <div class="game">
+            <div class="expression">
+                <div id="n0" class="number"></div>
+
+                <select id="op0" class="operator" aria-label="1つ目の演算子">
+                    <option>+</option>
+                    <option>-</option>
+                    <option>×</option>
+                    <option>÷</option>
+                </select>
+
+                <div id="n1" class="number"></div>
+
+                <select id="op1" class="operator" aria-label="2つ目の演算子">
+                    <option>+</option>
+                    <option>-</option>
+                    <option>×</option>
+                    <option>÷</option>
+                </select>
+
+                <div id="n2" class="number"></div>
+
+                <select id="op2" class="operator" aria-label="3つ目の演算子">
+                    <option>+</option>
+                    <option>-</option>
+                    <option>×</option>
+                    <option>÷</option>
+                </select>
+
+                <div id="n3" class="number"></div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button id="judgeButton" class="judge" onclick="judge()">判定</button>
+            <button class="restart" onclick="backToStart()">最初から</button>
+        </div>
+
+        <div id="result"></div>
+        <div id="finalMessage" class="final-message"></div>
+
+        <div class="note">
+            ※ 掛け算・割り算は通常の計算順序で計算します。括弧は使いません。<br>
+            ※ 出題される4つの数字は、必ず少なくとも1つの正解があります。
+        </div>
+    </div>
+</div>
+
+<script>
+const ops = ["+", "-", "×", "÷"];
+let START_TIME = 120; // 選択画面で選んだ持ち時間（秒）
+
+let numbers = [];
+let solution = [];
+let currentPlayer = 1;
+let playerTime = { 1: START_TIME, 2: START_TIME };
+let timerId = null;
+let gameOver = false;
+let switchingTurn = false;
+let finalRound=false;
+let playerTimedOut=null;
+
+/* ---------- Start screen logic ---------- */
+let selectedSeconds = 120;
+
+document.querySelectorAll(".time-option-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        document.querySelectorAll(".time-option-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedSeconds = parseInt(btn.dataset.seconds, 10);
+    });
+});
+
+function startGame(){
+    START_TIME = selectedSeconds;
+
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+
+    restartGame();
+}
+
+function backToStart(){
+    clearInterval(timerId);
+    gameOver = true;
+
+    document.getElementById("gameScreen").style.display = "none";
+    document.getElementById("startScreen").style.display = "block";
+}
+
+/* ---------- Game logic ---------- */
+function randomNumbers(){
+    return Array.from({ length:4 }, () => Math.floor(Math.random() * 9) + 1);
+}
+
+function toJsOp(op){
+    if(op === "×") return "*";
+    if(op === "÷") return "/";
+    return op;
+}
+
+function calculate(nums, usedOps){
+    try{
+        const exp =
+            nums[0] + toJsOp(usedOps[0]) +
+            nums[1] + toJsOp(usedOps[1]) +
+            nums[2] + toJsOp(usedOps[2]) +
+            nums[3];
+
+        const value = Function("return " + exp)();
+        if(!isFinite(value)) return null;
+        return value;
+    }catch{
+        return null;
+    }
+}
+
+function findSolution(nums){
+    for(const a of ops){
+        for(const b of ops){
+            for(const c of ops){
+                const value = calculate(nums, [a,b,c]);
+                if(value !== null && Math.abs(value - 10) < 0.000001){
+                    return [a,b,c];
+                }
+            }
+        }
+    }
+    return null;
+}
+
+function generatePuzzle(){
+    while(true){
+        const nums = randomNumbers();
+        const sol = findSolution(nums);
+        if(sol){
+            numbers = nums;
+            solution = sol;
+            return;
+        }
+    }
+}
+
+function displayNumbers(){
+    for(let i = 0; i < 4; i++){
+        document.getElementById("n" + i).textContent = numbers[i];
+    }
+}
+
+function resetOperators(){
+    document.getElementById("op0").value = "+";
+    document.getElementById("op1").value = "+";
+    document.getElementById("op2").value = "+";
+}
+
+function formatTime(seconds){
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return String(min).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+}
+
+function updateStatus(){
+    document.getElementById("currentPlayer").textContent = "Player" + currentPlayer;
+    document.getElementById("player1Time").textContent = formatTime(playerTime[1]);
+    document.getElementById("player2Time").textContent = formatTime(playerTime[2]);
+
+    document.getElementById("player1Box").classList.toggle("active", currentPlayer === 1);
+    document.getElementById("player2Box").classList.toggle("active", currentPlayer === 2);
+}
+
+function startTimer(){
+    clearInterval(timerId);
+    updateStatus();
+
+    timerId = setInterval(() => {
+        if(gameOver || switchingTurn) return;
+
+        playerTime[currentPlayer]--;
+        if(playerTime[currentPlayer] < 0) playerTime[currentPlayer] = 0;
+
+        updateStatus();
+
+        if(playerTime[currentPlayer] <= 0){
+            timeOver();
+        }
+    }, 1000);
+}
+
+function timeOver(){
+    clearInterval(timerId);
+    if(!finalRound){
+        finalRound=true;
+        playerTimedOut=currentPlayer;
+        currentPlayer=currentPlayer===1?2:1;
+        generatePuzzle();
+        displayNumbers();
+        resetOperators();
+        document.getElementById("result").innerHTML=`<span class="wrong">Player${playerTimedOut} が時間切れ！ Player${currentPlayer} は最後の1問です。</span>`;
+        updateStatus();
+        startTimer();
+        return;
+    }
+    clearInterval(timerId);
+    gameOver=true;
+    document.getElementById("result").innerHTML=`<span class="lose">引き分けです。</span>`;
+    document.getElementById("finalMessage").style.display="block";
+    document.getElementById("finalMessage").innerHTML="引き分け";
+    document.getElementById("judgeButton").disabled=true;
+}
+function judge(){
+    if(gameOver || switchingTurn) return;
+
+    const userOps = [
+        document.getElementById("op0").value,
+        document.getElementById("op1").value,
+        document.getElementById("op2").value
+    ];
+
+    const value = calculate(numbers, userOps);
+
+    if(value === null){
+        document.getElementById("result").innerHTML =
+            `<span class="wrong">計算エラーです。</span>`;
+        return;
+    }
+
+    if(Math.abs(value - 10) < 0.000001){
+        clearInterval(timerId);
+        switchingTurn = true;
+
+        document.getElementById("result").innerHTML =
+            `<span class="correct">Player${currentPlayer} 正解！ 次は相手のターンです。</span>`;
+
+        setTimeout(() => {
+            switchingTurn = false;
+            if(finalRound){gameOver=true;clearInterval(timerId);document.getElementById('finalMessage').style.display='block';document.getElementById('finalMessage').innerHTML=`Player${currentPlayer} の勝ち！`;document.getElementById('judgeButton').disabled=true;return;}
+            nextTurn();
+        }, 800);
+    }else{
+        document.getElementById("result").innerHTML =
+            `<span class="wrong">結果：${Math.round(value * 1000) / 1000}　もう一度！</span>`;
+    }
+}
+
+function nextTurn(){
+    if(gameOver) return;
+
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+
+    generatePuzzle();
+    displayNumbers();
+    resetOperators();
+
+    document.getElementById("result").innerHTML = "";
+
+    updateStatus();
+    startTimer();
+}
+
+function restartGame(){
+    clearInterval(timerId);
+
+    numbers = [];
+    solution = [];
+    currentPlayer = 1;
+    playerTime = { 1: START_TIME, 2: START_TIME };
+    gameOver = false;
+    switchingTurn = false;
+    finalRound=false;
+    playerTimedOut=null;
+
+    generatePuzzle();
+    displayNumbers();
+    resetOperators();
+
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("finalMessage").style.display = "none";
+    document.getElementById("finalMessage").innerHTML = "";
+
+    document.getElementById("judgeButton").disabled = false;
+
+    updateStatus();
+    startTimer();
+}
+</script>
+</body>
+</html>
