@@ -180,7 +180,7 @@ h2{
 
 .operator{
     width:52px;
-    height:40px;
+    height:58px;
     font-size:30px;
     font-weight:800;
     text-align:center;
@@ -236,6 +236,10 @@ button:disabled{
     transform:translateX(-50%);
 }
 
+.judge:disabled{
+    transform:translateX(-50%);
+}
+
 .judge:active{ transform:translateX(-50%) translateY(1px); }
 
 .restart{
@@ -282,7 +286,7 @@ button:disabled{
     h1{ font-size:30px; }
     .status{ grid-template-columns:1fr; }
     .number{ width:30px; font-size:28px; }
-    .operator{ width:40px; height:40px; font-size:24px; background-size:7px 4px; padding:0 9px 0 3px; }
+    .operator{ width:40px; height:52px; font-size:24px; background-size:7px 4px; padding:0 9px 0 3px; }
     .game{ padding:18px; }
     .value{ font-size:26px; }
     .time-option-btn{ min-width:80px; padding:12px 14px; font-size:16px; }
@@ -298,7 +302,8 @@ button:disabled{
         Player1 と Player2 が交互に1問ずつ解きます。<br>
         正解すると相手のターンになります。<br>
         持ち時間が0になったプレイヤーは負けです。<br>
-        ただし、後攻は先攻の持ち時間が０になってから１問解答しないと引き分けになります。
+        ただし、Player1（先攻）の持ち時間が０になった場合は、Player2が最後の1問に正解しないと引き分けになります。<br>
+        Player2（後攻）の持ち時間が０になった場合は、その時点でPlayer1の勝利となります。
     </div>
 
     <!-- ---------- Start screen ---------- -->
@@ -525,6 +530,17 @@ function startTimer(){
 
 function timeOver(){
     clearInterval(timerId);
+
+    if(currentPlayer === 2){
+        gameOver=true;
+        document.getElementById("result").innerHTML=`<span class="wrong">Player2 が時間切れ！</span>`;
+        document.getElementById("finalMessage").style.display="block";
+        document.getElementById("finalMessage").innerHTML="Player1 の勝ち！";
+        document.getElementById("judgeButton").disabled=true;
+        updateStatus();
+        return;
+    }
+
     if(!finalRound){
         finalRound=true;
         playerTimedOut=currentPlayer;
