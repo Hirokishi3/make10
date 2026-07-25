@@ -302,7 +302,8 @@ button:disabled{
         Player1 と Player2 が交互に1問ずつ解きます。<br>
         正解すると相手のターンになります。<br>
         持ち時間が0になったプレイヤーは負けです。<br>
-        ただし、Player1の持ち時間が０になった場合は、Player2が最後の1問に正解しないと引き分けになります。
+        ただし、Player1（先攻）の持ち時間が０になった場合は、Player2が最後の1問に正解しないと引き分けになります。<br>
+        Player2（後攻）の持ち時間が０になった場合は、その時点でPlayer1の勝利となります。
     </div>
 
     <!-- ---------- Start screen ---------- -->
@@ -530,6 +531,16 @@ function startTimer(){
 function timeOver(){
     clearInterval(timerId);
 
+    if(finalRound){
+        gameOver=true;
+        document.getElementById("result").innerHTML=`<span class="lose">引き分けです。</span>`;
+        document.getElementById("finalMessage").style.display="block";
+        document.getElementById("finalMessage").innerHTML="引き分け";
+        document.getElementById("judgeButton").disabled=true;
+        updateStatus();
+        return;
+    }
+
     if(currentPlayer === 2){
         gameOver=true;
         document.getElementById("result").innerHTML=`<span class="wrong">Player2 が時間切れ！</span>`;
@@ -540,24 +551,15 @@ function timeOver(){
         return;
     }
 
-    if(!finalRound){
-        finalRound=true;
-        playerTimedOut=currentPlayer;
-        currentPlayer=currentPlayer===1?2:1;
-        generatePuzzle();
-        displayNumbers();
-        resetOperators();
-        document.getElementById("result").innerHTML=`<span class="wrong">Player${playerTimedOut} が時間切れ！ Player${currentPlayer} は最後の1問です。</span>`;
-        updateStatus();
-        startTimer();
-        return;
-    }
-    clearInterval(timerId);
-    gameOver=true;
-    document.getElementById("result").innerHTML=`<span class="lose">引き分けです。</span>`;
-    document.getElementById("finalMessage").style.display="block";
-    document.getElementById("finalMessage").innerHTML="引き分け";
-    document.getElementById("judgeButton").disabled=true;
+    finalRound=true;
+    playerTimedOut=currentPlayer;
+    currentPlayer=2;
+    generatePuzzle();
+    displayNumbers();
+    resetOperators();
+    document.getElementById("result").innerHTML=`<span class="wrong">Player${playerTimedOut} が時間切れ！ Player${currentPlayer} は最後の1問です。</span>`;
+    updateStatus();
+    startTimer();
 }
 function judge(){
     if(gameOver || switchingTurn) return;
